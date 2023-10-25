@@ -6,7 +6,7 @@ const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const path = require("path");
-const cors = require('cors');
+
 
 
 dotenv.config();
@@ -53,11 +53,13 @@ const server = app.listen(
   PORT,
   console.log(`Server running on PORT ${PORT}...`.yellow.bold)
 );
-
+const corsOrigin = process.env.NODE_ENV === "production"
+  ? "https://talk-a-tive-29l5.onrender.com/"
+  : "http://localhost:5000";
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:3000",
+    origin: corsOrigin,
     // credentials: true,
   },
 });
