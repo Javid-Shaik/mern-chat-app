@@ -56,6 +56,8 @@ const server = app.listen(
 const corsOrigin = process.env.NODE_ENV === "production"
   ? "https://talk-a-tive-29l5.onrender.com/"
   : "http://localhost:5000";
+
+
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
