@@ -33,6 +33,18 @@ userSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
+userSchema.pre("remove", async function (next) {
+  // Get the ID of the user being removed
+  const userId = this._id;
+
+  // Assuming you have a Chat model
+  const Chat = require("./chatModel");
+
+  // Delete the chat associated with this user
+  await Chat.deleteMany({ users: userId });
+
+  next();
+});
 
 const User = mongoose.model("User", userSchema);
 
