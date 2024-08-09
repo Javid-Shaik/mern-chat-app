@@ -1,3 +1,4 @@
+import React, { useEffect} from 'react';
 import { Button } from "@chakra-ui/button";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { Input } from "@chakra-ui/input";
@@ -32,6 +33,8 @@ import { getSender } from "../../config/ChatLogics";
 import UserListItem from "../userAvatar/UserListItem";
 import { ChatState } from "../../Context/ChatProvider";
 
+const notificationSound = new Audio('/notification.wav');
+
 function SideDrawer() {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
@@ -50,6 +53,21 @@ function SideDrawer() {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const history = useHistory();
+
+  const playNotificationSound = () => {
+    // Check if the audio is already playing
+    if (notificationSound.paused) {
+      notificationSound.play();
+    }
+  };
+
+  useEffect(() => {
+    if (notification.length > 0) {
+      // Delay to allow for user interaction
+      const timer = setTimeout(playNotificationSound, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const logoutHandler = () => {
     localStorage.removeItem("userInfo");
