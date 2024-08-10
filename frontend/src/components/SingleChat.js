@@ -1,6 +1,6 @@
+import { Box, Text, Button } from "@chakra-ui/react"; // Add Button to imports
 import { FormControl } from "@chakra-ui/form-control";
 import { Input } from "@chakra-ui/input";
-import { Box, Text } from "@chakra-ui/layout";
 import "./styles.css";
 import { IconButton, Spinner, useToast } from "@chakra-ui/react";
 import { getSender, getSenderFull } from "../config/ChatLogics";
@@ -11,6 +11,8 @@ import ProfileModal from "./miscellaneous/ProfileModal";
 import ScrollableChat from "./ScrollableChat";
 import Lottie from "react-lottie";
 import animationData from "../animations/typing.json";
+import  EmojiPicker  from "emoji-picker-react"; // Import emoji picker
+import { AttachmentIcon } from "@chakra-ui/icons";
 
 import io from "socket.io-client";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
@@ -25,6 +27,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [istyping, setIsTyping] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false); // Add state for emoji picker
   const toast = useToast();
 
   const defaultOptions = {
@@ -70,8 +73,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   };
 
-  const sendMessage = async (event) => {
-    if (event.key === "Enter" && newMessage) {
+  const handleEmojiClick = (emoji) => {
+    setNewMessage((prevMessage) => prevMessage + emoji.emoji);
+    setShowEmojiPicker(false); // Hide emoji picker after selection
+  };
+
+  const sendMessage = async () => {
+    if (newMessage) {
       socket.emit("stop typing", selectedChat._id);
       try {
         const config = {
@@ -88,7 +96,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             chatId: selectedChat,
           },
           config
-        );
+        ); 
         socket.emit("new message", data);
         setMessages([...messages, data]);
       } catch (error) {
@@ -222,7 +230,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             )}
 
             <FormControl
-              onKeyDown={sendMessage}
               id="first-name"
               isRequired
               mt={3}
@@ -231,7 +238,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 <div>
                   <Lottie
                     options={defaultOptions}
-                    // height={50}
                     width={70}
                     style={{ marginBottom: 15, marginLeft: 0 }}
                   />
@@ -239,13 +245,32 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               ) : (
                 <></>
               )}
-              <Input
-                variant="filled"
-                bg="#E0E0E0"
-                placeholder="Enter a message.."
-                value={newMessage}
-                onChange={typingHandler}
-              />
+              <Box d="flex" alignItems="center">
+                <IconButton
+                  aria-label="Attach Emoji"
+                  icon={<AttachmentIcon />}
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)} // Toggle emoji picker
+                />
+                <Input
+                  variant="filled"
+                  bg="#E0E0E0"
+                  placeholder="Enter a message.."
+                  value={newMessage}
+                  onChange={typingHandler}
+                />
+                <Button
+                  colorScheme="teal"
+                  ml={2}
+                  onClick={sendMessage}
+                >
+                  Send
+                </Button>
+              </Box>
+              {showEmojiPicker && (
+                <Box position="absolute" bottom="60px" zIndex={1}>
+                  <EmojiPicker onEmojiClick={handleEmojiClick} />
+                </Box>
+              )}
             </FormControl>
           </Box>
         </>
